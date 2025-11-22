@@ -3,6 +3,7 @@ import { proxyActivities } from '@temporalio/workflow';
 import { IOrderActivity } from '../activities/order.activity';
 import { IPaymentClientActivity } from '../activities/payment-client.activity';
 import { Compensation } from '../types/temporal.type';
+import { compensate } from '../helper/compensate.helper';
 
 const { createOrderInDb, rollbackCreateOrderInDb } =
   proxyActivities<IOrderActivity>({
@@ -29,5 +30,7 @@ export async function createOrderWorkflow(
     await withdrawPayment();
     compensations.push(); //rollback
     // ... rest
-  } catch (error) {}
+  } catch (error) {
+    await compensate(compensations);
+  }
 }
